@@ -50,9 +50,37 @@ namespace Orchestrate.Net.Tests
 		[Test]
 		public void PostEventNowTimeStamp()
 		{
-			var result = _eventClient.PostEvent(CollectionName, "1", "comment", DateTime.UtcNow, "This is the PutEventNowTimeStamp comment.");
+			var result = _eventClient.PostEvent(CollectionName, "1", "comment", DateTime.UtcNow, "This is the PostEventNowTimeStamp comment.");
 
 			Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
+			Assert.IsFalse(string.IsNullOrEmpty(result.Path.Ordinal));
+		}
+
+		[Test]
+		public void PostEventNoTimeStamp()
+		{
+			var result = _eventClient.PostEvent(CollectionName, "1", "comment", null, "This is the PostEventNoTimeStamp comment.");
+
+			Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
+			Assert.IsFalse(string.IsNullOrEmpty(result.Path.Ordinal));
+		}
+
+		[Test]
+		public void PostEventNowTimeStampAsync()
+		{
+			var result = _eventClient.PostEventAsync(CollectionName, "1", "comment", DateTime.UtcNow, "This is the PostEventNowTimeStamp comment.").Result;
+
+			Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
+			Assert.IsFalse(string.IsNullOrEmpty(result.Path.Ordinal));
+		}
+
+		[Test]
+		public void PostEventNoTimeStampAsync()
+		{
+			var result = _eventClient.PostEventAsync(CollectionName, "1", "comment", null, "This is the PostEventNoTimeStamp comment.").Result;
+
+			Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
+			Assert.IsFalse(string.IsNullOrEmpty(result.Path.Ordinal));
 		}
 
         [Test]
@@ -177,6 +205,105 @@ namespace Orchestrate.Net.Tests
 
             Assert.Fail("No Exception Thrown");
         }
+
+		[Test]
+		public void PostEventWithNoCollectionName()
+		{
+			try
+			{
+				_eventClient.PostEvent(string.Empty, "1", "comment", null, "This is the PostEventWithNoCollectionName comment.");
+			}
+			catch (ArgumentNullException ex)
+			{
+				Assert.IsTrue(ex.ParamName == "collectionName");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
+
+		[Test]
+		public void PostEventWithNoCollectionNameAsync()
+		{
+			try
+			{
+				var result = _eventClient.PostEventAsync(string.Empty, "1", "comment", null, "This is the PostEventWithNoCollectionName comment.").Result;
+			}
+			catch (AggregateException ex)
+			{
+				var inner = ex.InnerExceptions.First() as ArgumentNullException;
+				Assert.IsTrue(inner.ParamName == "collectionName");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
+
+		[Test]
+		public void PostEventWithNoKey()
+		{
+			try
+			{
+				_eventClient.PostEvent(CollectionName, string.Empty, "comment", null, "This is the PostEventWithNoKey comment.");
+			}
+			catch (ArgumentNullException ex)
+			{
+				Assert.IsTrue(ex.ParamName == "key");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
+
+		[Test]
+		public void PostEventWithNoKeyAsync()
+		{
+			try
+			{
+				var result = _eventClient.PostEventAsync(CollectionName, string.Empty, "comment", null, "This is the PostEventWithNoKey comment.").Result;
+			}
+			catch (AggregateException ex)
+			{
+				var inner = ex.InnerExceptions.First() as ArgumentNullException;
+				Assert.IsTrue(inner.ParamName == "key");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
+
+		[Test]
+		public void PostEventWithNoType()
+		{
+			try
+			{
+				_eventClient.PostEvent(CollectionName, "1", string.Empty, null, "This is the PostEventWithNoType comment.");
+			}
+			catch (ArgumentNullException ex)
+			{
+				Assert.IsTrue(ex.ParamName == "type");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
+
+		[Test]
+		public void PostEventWithNoTypeAsync()
+		{
+			try
+			{
+				var result = _eventClient.PostEventAsync(CollectionName, "1", string.Empty, null, "This is the PostEventWithNoType comment.").Result;
+			}
+			catch (AggregateException ex)
+			{
+				var inner = ex.InnerExceptions.First() as ArgumentNullException;
+				Assert.IsTrue(inner.ParamName == "type");
+				return;
+			}
+
+			Assert.Fail("No Exception Thrown");
+		}
 
         [Test]
 		public void GetEventsNoStartEnd()

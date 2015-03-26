@@ -15,14 +15,7 @@ namespace Orchestrate.Net
 
 		public SearchResult Search(string collectionName, string query, int limit = 10, int offset = 0)
 		{
-			try
-			{
-				return SearchAsync(collectionName, query, limit, offset).Result;
-			}
-			catch (AggregateException aggregateException)
-			{
-				throw aggregateException.InnerException;
-			}
+			return AggregateExceptionUnpacker.Unwrap(() => SearchAsync(collectionName, query, limit,offset).Result);
 		}
 
 		public async Task<SearchResult> SearchAsync(string collectionName, string query, int limit = 10, int offset = 0)

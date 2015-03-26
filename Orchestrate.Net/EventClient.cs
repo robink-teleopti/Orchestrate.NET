@@ -4,23 +4,6 @@ using Newtonsoft.Json;
 
 namespace Orchestrate.Net
 {
-	public static class AggregateExceptionUnpacker
-	{
-		public static TResult Unwrap<TResult>(Func<TResult> call)
-		{
-			TResult result = default(TResult);
-			try
-			{
-				result = call();
-			}
-			catch (AggregateException ae)
-			{
-				ae.Handle(e => { throw e; });
-			}
-			return result;
-		}
-	}
-
 	public class EventClient
     {
 		private readonly ICommunication _communication;
@@ -32,10 +15,15 @@ namespace Orchestrate.Net
 
         public EventResultList GetEvents(string collectionName, string key, string type, DateTime? start = null, DateTime? end = null)
         {
-	        return GetEventsAsync(collectionName, key, type, start, end).Result;
+	        return AggregateExceptionUnpacker.Unwrap(()=> GetEventsAsync(collectionName, key, type, start, end).Result);
         }
 
 		public Result PostEvent(string collectionName, string key, string type, DateTime? timeStamp, string msg)
+		{
+			return AggregateExceptionUnpacker.Unwrap(() => PostEventAsync(collectionName, key, type, timeStamp, msg).Result);
+		}
+
+		public async Task<Result> PostEventAsync(string collectionName, string key, string type, DateTime? timeStamp, string msg)
 		{
 			if (string.IsNullOrEmpty(collectionName))
 				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
@@ -54,11 +42,12 @@ namespace Orchestrate.Net
 			var message = new EventMessage { Msg = msg };
 			var json = JsonConvert.SerializeObject(message);
 
-			var baseResult = _communication.CallWebRequest(url, "PUT", json);
+			var baseResult = await _communication.CallWebRequestAsync(url, "POST", json);
+			var ordinal = ExtractOrdinalFromLocation(baseResult);
 
 			return new Result
 			{
-				Path = new OrchestratePath(collectionName,key,baseResult.ETag),
+				Path = new OrchestratePath(collectionName, key, baseResult.ETag, ordinal),
 				Score = 1,
 				Value = baseResult.Payload
 			};
@@ -66,7 +55,7 @@ namespace Orchestrate.Net
 
         public Result PutEvent(string collectionName, string key, string type, DateTime? timeStamp, string msg)
         {
-	        return PutEventAsync(collectionName, key, type, timeStamp, msg).Result;
+			return AggregateExceptionUnpacker.Unwrap(() => PutEventAsync(collectionName, key, type, timeStamp, msg).Result);
         }
 
         public async Task<EventResultList> GetEventsAsync(string collectionName, string key, string type, DateTime? start = null, DateTime? end = null)
@@ -131,13 +120,11 @@ namespace Orchestrate.Net
             return Math.Floor(diff.TotalMilliseconds);
         }
 
-		private static string ExtractOrdinalFromLocation(BaseResult baseResult, string collection)
+		private static string ExtractOrdinalFromLocation(BaseResult baseResult)
 		{
 			// Always in the format /v0/<collection>/<key>/events/<type>/<timestamp>/<ordinal>
-			// <ref> is included in BaseResult
-			string key = baseResult.Location.Replace("/v0/" + collection + "/", "");
-			int index = key.IndexOf("/refs");
-			return key.Remove(index);
+			var fragments = baseResult.Location.Split('/');
+			return fragments[fragments.Length - 1];
 		}
     }
 }

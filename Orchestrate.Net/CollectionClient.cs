@@ -60,142 +60,37 @@ namespace Orchestrate.Net
 
 		public Result PutIfMatch(string collectionName, string key, string item, string ifMatch)
 		{
-			if (string.IsNullOrEmpty(collectionName))
-				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
-
-			if (string.IsNullOrEmpty(key))
-				throw new ArgumentNullException("key", "key cannot be null or empty");
-
-			if (string.IsNullOrEmpty(item))
-				throw new ArgumentNullException("item", "json cannot be empty");
-
-			if (string.IsNullOrEmpty(ifMatch))
-				throw new ArgumentNullException("ifMatch", "ifMatch cannot be empty");
-
-			var url = collectionName + "/" + key;
-			var baseResult = _communication.CallWebRequest(url, "PUT", item, ifMatch);
-
-			return new Result
-			{
-				Path = new OrchestratePath(collectionName, key, baseResult.ETag),
-				Score = 1,
-				Value = baseResult.Payload
-			};
+			return AggregateExceptionUnpacker.Unwrap(() => PutIfMatchAsync(collectionName, key, item, ifMatch).Result);
 		}
 
 		public Result PutIfMatch(string collectionName, string key, object item, string ifMatch)
 		{
-			if (item == null)
-				throw new ArgumentNullException("item", "item cannot be null");
-
-			var json = JsonConvert.SerializeObject(item);
-			return PutIfMatch(collectionName, key, json, ifMatch);
+			return AggregateExceptionUnpacker.Unwrap(() => PutIfMatchAsync(collectionName, key, item, ifMatch).Result);
 		}
 
 		public Result PutIfNoneMatch(string collectionName, string key, string item)
 		{
-			if (string.IsNullOrEmpty(collectionName))
-				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
-
-			if (string.IsNullOrEmpty(key))
-				throw new ArgumentNullException("key", "key cannot be null or empty");
-
-			if (string.IsNullOrEmpty(item))
-				throw new ArgumentNullException("item", "item cannot be empty");
-
-			var url = collectionName + "/" + key;
-			var baseResult = _communication.CallWebRequest(url, "PUT", item, null, true);
-
-			return new Result
-			{
-				Path = new OrchestratePath(collectionName, key, baseResult.ETag),
-				Score = 1,
-				Value = baseResult.Payload
-			};
+			return AggregateExceptionUnpacker.Unwrap(() => PutIfNoneMatchAsync(collectionName, key, item).Result);
 		}
 
 		public Result PutIfNoneMatch(string collectionName, string key, object item)
 		{
-			if (item == null)
-				throw new ArgumentNullException("item", "item cannot be null");
-
-			var json = JsonConvert.SerializeObject(item);
-			return PutIfNoneMatch(collectionName, key, json);
+			return AggregateExceptionUnpacker.Unwrap(() => PutIfNoneMatchAsync(collectionName, key, item).Result);
 		}
 
 		public Result Delete(string collectionName, string key, bool purge)
 		{
-			if (string.IsNullOrEmpty(collectionName))
-				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
-
-			if (string.IsNullOrEmpty(key))
-				throw new ArgumentNullException("key", "key cannot be null or empty");
-
-			var url = collectionName + "/" + key;
-
-			if (purge)
-				url += "?purge=true";
-			else
-				url += "?purge=false";
-
-			var baseResult = _communication.CallWebRequest(url, "DELETE", null);
-
-			return new Result
-			{
-				Path = new OrchestratePath(collectionName, key, baseResult.ETag),
-				Score = 1,
-				Value = baseResult.Payload
-			};
+			return AggregateExceptionUnpacker.Unwrap(() => DeleteAsync(collectionName, key, purge).Result);
 		}
 
 		public ListResult List(string collectionName, int limit, string startKey, string afterKey)
 		{
-			if (string.IsNullOrEmpty(collectionName))
-				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
-
-			if (limit < 1 || limit > 100)
-				throw new ArgumentOutOfRangeException("limit", "limit must be between 1 and 100");
-
-			if (!string.IsNullOrEmpty(startKey) && !string.IsNullOrEmpty(afterKey))
-				throw new ArgumentException("May only specify either a startKey or an afterKey", "startKey");
-
-			var url = collectionName + "?limit=" + limit;
-
-			if (!string.IsNullOrEmpty(startKey))
-				url += "&startKey=" + startKey;
-
-			if (!string.IsNullOrEmpty(afterKey))
-				url += "&afterKey=" + afterKey;
-
-			return JsonConvert.DeserializeObject<ListResult>(_communication.CallWebRequest(url, "GET", null).Payload);
+			return AggregateExceptionUnpacker.Unwrap(() => ListAsync(collectionName, limit, startKey,afterKey).Result);
 		}
 
 		public Result DeleteIfMatch(string collectionName, string key, string ifMatch, bool purge)
 		{
-			if (string.IsNullOrEmpty(collectionName))
-				throw new ArgumentNullException("collectionName", "collectionName cannot be null or empty");
-
-			if (string.IsNullOrEmpty(key))
-				throw new ArgumentNullException("key", "key cannot be null or empty");
-
-			if (string.IsNullOrEmpty(ifMatch))
-				throw new ArgumentNullException("ifMatch", "ifMatch cannot be null or empty");
-
-			var url = collectionName + "/" + key;
-
-			if (purge)
-				url += "?purge=true";
-			else
-				url += "?purge=false";
-
-			var baseResult = _communication.CallWebRequest(url, "DELETE", null, ifMatch);
-
-			return new Result
-			{
-				Path = new OrchestratePath(collectionName, key, baseResult.ETag),
-				Score = 1,
-				Value = baseResult.Payload
-			};
+			return AggregateExceptionUnpacker.Unwrap(() => DeleteIfMatchAsync(collectionName, key, ifMatch, purge).Result);
 		}
 
 		public async Task<Result> CreateCollectionAsync(string collectionName, string key, object item)

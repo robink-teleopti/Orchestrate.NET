@@ -68,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateExceptionUnpacker.cs" />
     <Compile Include="CollectionClient.cs" />
     <Compile Include="Communication.cs" />
     <Compile Include="Extensions\HttpMethodExtensions.cs" />
