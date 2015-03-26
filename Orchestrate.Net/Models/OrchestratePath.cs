@@ -1,9 +1,11 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Orchestrate.Net
 {
     public struct OrchestratePath : IEquatable<OrchestratePath>
-    {
+	{
+		[JsonConstructor]
 	    public OrchestratePath(string collection, string key, string @ref, string ordinal = null) : this()
 	    {
 		    Ordinal = ordinal;

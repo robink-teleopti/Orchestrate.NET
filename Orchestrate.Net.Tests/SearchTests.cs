@@ -9,12 +9,12 @@ namespace Orchestrate.Net.Tests
     public class SearchTests
     {
 		    private const string CollectionName = "SearchTestCollection";
-        private Orchestrate _orchestrate;
+        private SearchClient _searchClient;
 
 		[TestFixtureSetUp]
         public static void ClassInitialize()
         {
-					var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
 
             var item = new TestData { Id = 1, Value = "Inital Test Item" };
             var item2 = new TestData { Id = 2, Value = "Inital Test Item #2" };
@@ -28,14 +28,14 @@ namespace Orchestrate.Net.Tests
 		[TestFixtureTearDown]
         public static void ClassCleanUp()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             orchestrate.DeleteCollection(CollectionName);
         }
 
 		[SetUp]
         public void TestInitialize()
         {
-					_orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			_searchClient = new SearchClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
         }
 
 		[TearDown]
@@ -47,7 +47,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchSuccess()
         {
-            var result = _orchestrate.Search(CollectionName, "*");
+            var result = _searchClient.Search(CollectionName, "*");
 
             Assert.IsTrue(result.Count > 0);
         }
@@ -55,7 +55,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchSuccessAsync()
         {
-            var result = _orchestrate.SearchAsync(CollectionName, "*").Result;
+            var result = _searchClient.SearchAsync(CollectionName, "*").Result;
 
             Assert.IsTrue(result.Count > 0);
         }
@@ -63,7 +63,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchNotFound()
         {
-            var result = _orchestrate.Search(CollectionName, "Id:9999");
+            var result = _searchClient.Search(CollectionName, "Id:9999");
 
             Assert.IsTrue(result.Count == 0);
         }
@@ -71,7 +71,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchNotFoundAsync()
         {
-            var result = _orchestrate.SearchAsync(CollectionName, "Id:9999").Result;
+            var result = _searchClient.SearchAsync(CollectionName, "Id:9999").Result;
 
             Assert.IsTrue(result.Count == 0);
         }
@@ -79,7 +79,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchBadKey()
         {
-            var result = _orchestrate.Search(CollectionName, "NonExistantKey:9999");
+            var result = _searchClient.Search(CollectionName, "NonExistantKey:9999");
 
             Assert.IsTrue(result.Count == 0);
         }
@@ -87,7 +87,7 @@ namespace Orchestrate.Net.Tests
         [Test]
         public void SearchBadKeyAsync()
         {
-            var result = _orchestrate.SearchAsync(CollectionName, "NonExistantKey:9999").Result;
+            var result = _searchClient.SearchAsync(CollectionName, "NonExistantKey:9999").Result;
 
             Assert.IsTrue(result.Count == 0);
         }
@@ -97,7 +97,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.Search(string.Empty, "9999");
+                _searchClient.Search(string.Empty, "9999");
             }
             catch (ArgumentNullException ex)
             {
@@ -113,7 +113,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.SearchAsync(string.Empty, "9999").Result;
+                var result = _searchClient.SearchAsync(string.Empty, "9999").Result;
             }
             catch (AggregateException ex)
             {
@@ -130,7 +130,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.Search(CollectionName, string.Empty);
+                _searchClient.Search(CollectionName, string.Empty);
             }
             catch (ArgumentNullException ex)
             {
@@ -146,7 +146,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.SearchAsync(CollectionName, string.Empty).Result;
+                var result = _searchClient.SearchAsync(CollectionName, string.Empty).Result;
             }
             catch (AggregateException ex)
             {
@@ -163,7 +163,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.Search(CollectionName, "*", -100);
+                _searchClient.Search(CollectionName, "*", -100);
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -179,7 +179,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.SearchAsync(CollectionName, "*", -100).Result;
+                var result = _searchClient.SearchAsync(CollectionName, "*", -100).Result;
             }
             catch (AggregateException ex)
             {
@@ -196,7 +196,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.Search(CollectionName, "*", 10, -1);
+                _searchClient.Search(CollectionName, "*", 10, -1);
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -212,7 +212,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.SearchAsync(CollectionName, "*", 10, -1).Result;
+                var result = _searchClient.SearchAsync(CollectionName, "*", 10, -1).Result;
             }
             catch (AggregateException ex)
             {

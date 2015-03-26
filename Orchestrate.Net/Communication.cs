@@ -7,18 +7,25 @@ using System.Threading.Tasks;
 
 namespace Orchestrate.Net
 {
-	internal static class Communication
+	public class Communication : ICommunication
 	{
-		internal static BaseResult CallWebRequest(string apiKey, string url, string method, string jsonPayload, string ifMatch = null, bool ifNoneMatch = false)
+		private readonly IOrchestrateCredentials _orchestrateCredentials;
+
+		public Communication(IOrchestrateCredentials orchestrateCredentials)
 		{
-			return CallOrchestrate(apiKey, url, method, jsonPayload, ifMatch, ifNoneMatch);
+			_orchestrateCredentials = orchestrateCredentials;
 		}
 
-		internal static Task<BaseResult> CallWebRequestAsync(string apiKey, string url, string method, string jsonPayload, string ifMatch = null, bool ifNoneMatch = false)
+		public BaseResult CallWebRequest(string url, string method, string jsonPayload, string ifMatch = null, bool ifNoneMatch = false)
+		{
+			return CallWebRequestAsync(url, method, jsonPayload, ifMatch, ifNoneMatch).Result;
+		}
+
+		public Task<BaseResult> CallWebRequestAsync(string url, string method, string jsonPayload, string ifMatch = null, bool ifNoneMatch = false)
 		{
 			var httpMethod = method.ToHttpMethod();
 			var httpClient = new HttpClient();
-			var request = new HttpRequestMessage(httpMethod, url);
+			var request = new HttpRequestMessage(httpMethod, _orchestrateCredentials.PrependHost(url));
 
 			if (jsonPayload != null && httpMethod.CanHaveContent())
 			{
@@ -34,7 +41,7 @@ namespace Orchestrate.Net
 			}
 
 			var authorization =
-						Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:", apiKey)));
+						Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:", _orchestrateCredentials.ApiKey)));
 
 			request.Headers.Authorization = new AuthenticationHeaderValue("Basic", authorization);
 			return httpClient.SendAsync(request).ContinueWith<BaseResult>(BuildResult);
@@ -57,11 +64,6 @@ namespace Orchestrate.Net
 				Payload = payload
 			};
 			return toReturn;
-		}
-
-		private static BaseResult CallOrchestrate(string apiKey, string url, string method, string jsonPayload, string ifMatch, bool ifNoneMatch)
-		{
-			return CallWebRequestAsync(apiKey, url, method, jsonPayload, ifMatch, ifNoneMatch).Result;
 		}
 	}
 }

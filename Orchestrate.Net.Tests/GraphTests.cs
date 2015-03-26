@@ -9,12 +9,13 @@ namespace Orchestrate.Net.Tests
     public class GraphTests
     {
         private const string CollectionName = "GraphTestCollection";
-        private Orchestrate _orchestrate;
+        private GraphClient _graphClient;
+		private CollectionClient _orchestrate;
 
-        [TestFixtureSetUp]
+	    [TestFixtureSetUp]
         public static void ClassInitialize()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             var item = new TestData {Id = 1, Value = "Inital Test Item"};
 
             orchestrate.CreateCollection(CollectionName, "1", item);
@@ -23,7 +24,7 @@ namespace Orchestrate.Net.Tests
         [TestFixtureTearDown]
         public static void ClassCleanUp()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             orchestrate.DeleteCollection(CollectionName);
             orchestrate.DeleteCollection("GraphTestCollection2");
             orchestrate.DeleteCollection("GraphTestCollection3");
@@ -32,10 +33,12 @@ namespace Orchestrate.Net.Tests
         [SetUp]
         public void TestInitialize()
         {
-            _orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+	        var communication = new Communication(new OrchestrateCredentials(TestHelper.ApiKey));
+	        _graphClient = new GraphClient(communication);
+			_orchestrate = new CollectionClient(communication);
         }
 
-        [TearDown]
+	    [TearDown]
         public void TestCleanup()
         {
         }
@@ -46,7 +49,7 @@ namespace Orchestrate.Net.Tests
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
 
-            var result = _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            var result = _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
         }
@@ -58,7 +61,7 @@ namespace Orchestrate.Net.Tests
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
 
             var result =
-                _orchestrate.PutGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
+                _graphClient.PutGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
 
             Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
         }
@@ -68,7 +71,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.PutGraph(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2");
+                _graphClient.PutGraph(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -85,7 +88,7 @@ namespace Orchestrate.Net.Tests
             try
             {
                 var result =
-                    _orchestrate.PutGraphAsync(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
+                    _graphClient.PutGraphAsync(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -102,7 +105,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.PutGraph(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2");
+                _graphClient.PutGraph(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -118,7 +121,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.PutGraphAsync(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2").Result;
+                var result = _graphClient.PutGraphAsync(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -135,7 +138,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.PutGraph(CollectionName, "1", string.Empty, "GraphTestCollection2", "2");
+                _graphClient.PutGraph(CollectionName, "1", string.Empty, "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -151,7 +154,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.PutGraphAsync(CollectionName, "1", string.Empty, "GraphTestCollection2", "2").Result;
+                var result = _graphClient.PutGraphAsync(CollectionName, "1", string.Empty, "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -168,7 +171,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", string.Empty, "2");
+                _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", string.Empty, "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -184,7 +187,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.PutGraphAsync(CollectionName, "1", "toplevelgraph", string.Empty, "2").Result;
+                var result = _graphClient.PutGraphAsync(CollectionName, "1", "toplevelgraph", string.Empty, "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -201,7 +204,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty);
+                _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty);
             }
             catch (ArgumentNullException ex)
             {
@@ -217,7 +220,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.PutGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty).Result;
+                var result = _graphClient.PutGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty).Result;
             }
             catch (AggregateException ex)
             {
@@ -234,10 +237,10 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
-            var result = _orchestrate.GetGraph(CollectionName, "1", kinds);
+            var result = _graphClient.GetGraph(CollectionName, "1", kinds);
 
             Assert.IsTrue(result.Count == 1);
         }
@@ -247,10 +250,10 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
-            var result = _orchestrate.GetGraphAsync(CollectionName, "1", kinds).Result;
+            var result = _graphClient.GetGraphAsync(CollectionName, "1", kinds).Result;
 
             Assert.IsTrue(result.Count == 1);
         }
@@ -260,15 +263,15 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             data = new TestData {Id = 3, Value = "This is collection 3 data"};
             _orchestrate.CreateCollection("GraphTestCollection3", "3", data);
-            _orchestrate.PutGraph("GraphTestCollection2", "2", "sublevelgraph", "GraphTestCollection3", "3");
+            _graphClient.PutGraph("GraphTestCollection2", "2", "sublevelgraph", "GraphTestCollection3", "3");
 
             var kinds = new[] {"toplevelgraph", "sublevelgraph"};
 
-            var result = _orchestrate.GetGraph(CollectionName, "1", kinds);
+            var result = _graphClient.GetGraph(CollectionName, "1", kinds);
 
             Assert.IsTrue(result.Count == 1);
         }
@@ -278,15 +281,15 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             data = new TestData {Id = 3, Value = "This is collection 3 data"};
             _orchestrate.CreateCollection("GraphTestCollection3", "3", data);
-            _orchestrate.PutGraph("GraphTestCollection2", "2", "sublevelgraph", "GraphTestCollection3", "3");
+            _graphClient.PutGraph("GraphTestCollection2", "2", "sublevelgraph", "GraphTestCollection3", "3");
 
             var kinds = new[] {"toplevelgraph", "sublevelgraph"};
 
-            var result = _orchestrate.GetGraphAsync(CollectionName, "1", kinds).Result;
+            var result = _graphClient.GetGraphAsync(CollectionName, "1", kinds).Result;
 
             Assert.IsTrue(result.Count == 1);
         }
@@ -296,12 +299,12 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                _orchestrate.GetGraph(string.Empty, "1", kinds);
+                _graphClient.GetGraph(string.Empty, "1", kinds);
             }
             catch (ArgumentNullException ex)
             {
@@ -317,12 +320,12 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                var result = _orchestrate.GetGraphAsync(string.Empty, "1", kinds).Result;
+                var result = _graphClient.GetGraphAsync(string.Empty, "1", kinds).Result;
             }
             catch (AggregateException ex)
             {
@@ -339,12 +342,12 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                _orchestrate.GetGraph(CollectionName, string.Empty, kinds);
+                _graphClient.GetGraph(CollectionName, string.Empty, kinds);
             }
             catch (ArgumentNullException ex)
             {
@@ -360,12 +363,12 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                var result = _orchestrate.GetGraphAsync(CollectionName, string.Empty, kinds).Result;
+                var result = _graphClient.GetGraphAsync(CollectionName, string.Empty, kinds).Result;
             }
             catch (AggregateException ex)
             {
@@ -382,11 +385,11 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             try
             {
-                _orchestrate.GetGraph(CollectionName, "1", null);
+                _graphClient.GetGraph(CollectionName, "1", null);
             }
             catch (ArgumentNullException ex)
             {
@@ -402,11 +405,11 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             try
             {
-                var result = _orchestrate.GetGraphAsync(CollectionName, "1", null).Result;
+                var result = _graphClient.GetGraphAsync(CollectionName, "1", null).Result;
             }
             catch (AggregateException ex)
             {
@@ -423,13 +426,13 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
-            _orchestrate.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                _orchestrate.GetGraph(CollectionName, "1", kinds);
+                _graphClient.GetGraph(CollectionName, "1", kinds);
             }
             catch (Exception ex)
             {
@@ -442,13 +445,13 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
-            var result = _orchestrate.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            var result = _graphClient.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
             var kinds = new[] {"toplevelgraph"};
 
             try
             {
-                _orchestrate.GetGraph(CollectionName, "1", kinds);
+                _graphClient.GetGraph(CollectionName, "1", kinds);
             }
             catch (Exception ex)
             {
@@ -461,8 +464,8 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
-            var result = _orchestrate.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            var result = _graphClient.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
 
             Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
         }
@@ -472,8 +475,8 @@ namespace Orchestrate.Net.Tests
         {
             var data = new TestData {Id = 2, Value = "This is collection 2 data"};
             _orchestrate.CreateCollection("GraphTestCollection2", "2", data);
-            _orchestrate.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
-            var result = _orchestrate.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
+            _graphClient.PutGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2");
+            var result = _graphClient.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
 
             Assert.IsTrue(result.Value == null || result.Value.ToString() == string.Empty);
         }
@@ -483,7 +486,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.DeleteGraph(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2");
+                _graphClient.DeleteGraph(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -499,7 +502,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.DeleteGraphAsync(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
+                var result = _graphClient.DeleteGraphAsync(string.Empty, "1", "toplevelgraph", "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -516,7 +519,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.DeleteGraph(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2");
+                _graphClient.DeleteGraph(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -532,7 +535,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.DeleteGraphAsync(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2").Result;
+                var result = _graphClient.DeleteGraphAsync(CollectionName, string.Empty, "toplevelgraph", "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -549,7 +552,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.DeleteGraph(CollectionName, "1", string.Empty, "GraphTestCollection2", "2");
+                _graphClient.DeleteGraph(CollectionName, "1", string.Empty, "GraphTestCollection2", "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -565,7 +568,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.DeleteGraphAsync(CollectionName, "1", string.Empty, "GraphTestCollection2", "2").Result;
+                var result = _graphClient.DeleteGraphAsync(CollectionName, "1", string.Empty, "GraphTestCollection2", "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -582,7 +585,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.DeleteGraph(CollectionName, "1", "toplevelgraph", string.Empty, "2");
+                _graphClient.DeleteGraph(CollectionName, "1", "toplevelgraph", string.Empty, "2");
             }
             catch (ArgumentNullException ex)
             {
@@ -598,7 +601,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", string.Empty, "2").Result;
+                var result = _graphClient.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", string.Empty, "2").Result;
             }
             catch (AggregateException ex)
             {
@@ -615,7 +618,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                _orchestrate.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty);
+                _graphClient.DeleteGraph(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty);
             }
             catch (ArgumentNullException ex)
             {
@@ -631,7 +634,7 @@ namespace Orchestrate.Net.Tests
         {
             try
             {
-                var result = _orchestrate.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty).Result;
+                var result = _graphClient.DeleteGraphAsync(CollectionName, "1", "toplevelgraph", "GraphTestCollection2", string.Empty).Result;
             }
             catch (AggregateException ex)
             {

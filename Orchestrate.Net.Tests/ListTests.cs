@@ -9,12 +9,12 @@ namespace Orchestrate.Net.Tests
     public class ListTests
     {
         private const string CollectionName = "ListTestCollection";
-        private Orchestrate _orchestrate;
+        private CollectionClient _orchestrate;
 
 		[TestFixtureSetUp]
         public static void ClassInitialize()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
 
             var item = new TestData { Id = 1, Value = "Inital Test Item" };
             var item2 = new TestData { Id = 2, Value = "Inital Test Item #2" };
@@ -28,14 +28,14 @@ namespace Orchestrate.Net.Tests
 		[TestFixtureTearDown]
         public static void ClassCleanUp()
         {
-					var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             orchestrate.DeleteCollection(CollectionName);
         }
 
 		[SetUp]
         public void TestInitialize()
         {
-					_orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+			_orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
         }
 
 		[TearDown]
@@ -44,9 +44,7 @@ namespace Orchestrate.Net.Tests
             // nothing to see here...
         }
 
-        #region List Tests
-
-        [Test]
+		[Test]
         public void List()
         {
             var result = _orchestrate.List(CollectionName, 10, null, null);
@@ -186,7 +184,5 @@ namespace Orchestrate.Net.Tests
 
             Assert.Fail("No Exception Thrown");
         }
-
-        #endregion
     }
 }

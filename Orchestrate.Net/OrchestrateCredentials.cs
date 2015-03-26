@@ -2,13 +2,19 @@ namespace Orchestrate.Net
 {
 	public class OrchestrateCredentials : IOrchestrateCredentials
 	{
+		private readonly string _host;
+
 		public OrchestrateCredentials(string apiKey, string host = "https://api.orchestrate.io/")
 		{
 			ApiKey = apiKey;
-			Host = host + "v0/";
+			_host = host + "v0/";
 		}
 
 		public string ApiKey { get; private set; }
-		public string Host { get; private set; }
+
+		public string PrependHost(string url)
+		{
+			return _host + url;
+		}
 	}
 }

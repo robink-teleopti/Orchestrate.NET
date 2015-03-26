@@ -10,12 +10,12 @@ namespace Orchestrate.Net.Tests
     public class KeyValueTests
     {
         private const string CollectionName = "KeyValueTestCollection";
-        private Orchestrate _orchestrate;
+        private CollectionClient _orchestrate;
 
         [TestFixtureSetUp]
         public static void ClassInitialize()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+            var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             var item = new TestData {Id = 1, Value = "Inital Test Item"};
 
             orchestrate.CreateCollection(CollectionName, "1", item);
@@ -24,14 +24,14 @@ namespace Orchestrate.Net.Tests
         [TestFixtureTearDown]
         public static void ClassCleanUp()
         {
-            var orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+            var orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
             orchestrate.DeleteCollection(CollectionName);
         }
 
         [SetUp]
         public void TestInitialize()
         {
-            _orchestrate = new Orchestrate(new OrchestrateCredentials(TestHelper.ApiKey));
+            _orchestrate = new CollectionClient(new Communication(new OrchestrateCredentials(TestHelper.ApiKey)));
         }
 
         [TearDown]
